@@ -19,11 +19,10 @@
 
 var board = d3.select('.board').append('svg');
 
-const numEnemies = 10;
-
+const numEnemies = 40;
 var playingFieldSize = {
-  width: board.node().getBBox().width,
-  height: board.node().getBBox().height
+  width: board[0][0].scrollWidth,
+  height: board[0][0].scrollHeight
 };
 
 var generateCirclePositions = function(numCircles) {
@@ -47,8 +46,9 @@ board.selectAll('.enemy').data(generateCirclePositions(numEnemies))
 // Make them move!
 var updateEnemyPosition = function() {
   board.selectAll('.enemy').data(generateCirclePositions(numEnemies))
+                           .classed('collided', false)
                            .transition().duration(2000)
-                           .tween('Hi Fred', function(d, i) {
+                           .tween('Hi Oleg', function(d, i) {
                              var currentX = this.getAttribute('cx');
                              currentX = parseInt(currentX, 10);
                              var currentY = this.getAttribute('cy');
@@ -58,19 +58,22 @@ var updateEnemyPosition = function() {
                              var interpolateX = d3.interpolate(currentX, newX);
                              var interpolateY = d3.interpolate(currentY, newY);
                              return function(t) {
+                              // debugger;
+
                                var enemyX = interpolateX(t);
                                var enemyY = interpolateY(t);
-                               // debugger;
-                               if (Math.abs(enemyX - playerX) < 10 && Math.abs(enemyY - playerY) < 10) {
-
+                               if (!d3.select(this).classed('collided') && Math.abs(enemyX - (playerX + playingFieldSize.width / 2)) < 25 && Math.abs(enemyY - (playerY + playingFieldSize.height / 2)) < 25) {
+                                 console.log('COLLISSION !!');
+                                 console.log(d3.select(this).classed('collided'));
                                  var currentCollisions = d3.select('.collisions').selectAll('span');
                                  currentCollisions.text(parseInt(currentCollisions.text(), 10) + 1);
+                                 d3.select(this).classed('collided', true);
                                }
 
                              };
                            })
-                           .attr('cx', function (d) { return d.xAxis + '%'; })
-                           .attr('cy', function (d) { return d.yAxis + '%'; });
+                           .attr('cx', function (d) { return d.xAxis; })
+                           .attr('cy', function (d) { return d.yAxis; });
 };
 
 setInterval(updateEnemyPosition, 2000);
@@ -91,7 +94,7 @@ function randomPixelY() {
 }
 
 var dragstarted = function(d, i) {
-  console.log('You started dragging!');
+  console.log('You clicked a draggable!');
   if (newGame) {
     d.xAxis = 0;
     d.yAxis = 0;
@@ -110,7 +113,7 @@ var dragged = function(d, i) {
   playerY = d.yAxis;
 };
 var dragended = function() {
-  console.log('You finished dragging!');
+  console.log('Mouse released!');
 };
 
 var drag = d3.behavior.drag()
