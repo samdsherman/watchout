@@ -1,28 +1,47 @@
 // // start slingin' some d3 here.
 // var jsonCircles = [
-//   { "xAxis": 30, "yAxis": 30, "radius": 20, "color" : "green" },
-//   { "xAxis": 70, "yAxis": 70, "radius": 20, "color" : "purple"},
-//   { "xAxis": 110, "yAxis": 100, "radius": 20, "color" : "red"}];
+//   { 'xAxis': 30, 'yAxis': 30, 'radius': 20, 'color' : 'green' },
+//   { 'xAxis': 70, 'yAxis': 70, 'radius': 20, 'color' : 'purple'},
+//   { 'xAxis': 110, 'yAxis': 100, 'radius': 20, 'color' : 'red'}];
 
-// var svgContainer = d3.select("body").append("svg");
+// var svgContainer = d3.select('body').append('svg');
 
-// var circles = svgContainer.selectAll("circle")
+// var circles = svgContainer.selectAll('circle')
 //                           .data(jsonCircles)
 //                           .enter()
-//                           .append("circle");
+//                           .append('circle');
 
 // var circleAttributes = circles
-//                        .attr("cx", function (d) { return d.xAxis; })
-//                        .attr("cy", function (d) { return d.yAxis; })
-//                        .attr("r", function (d) { return d.radius; })
-//                        .style("fill", function(d) { return d.color; });
+//                        .attr('cx', function (d) { return d.xAxis; })
+//                        .attr('cy', function (d) { return d.yAxis; })
+//                        .attr('r', function (d) { return d.radius; })
+//                        .style('fill', function(d) { return d.color; });
 
 var board = d3.select('.board').append('svg');
+var defs = board.append('svg:defs');
+defs.append('svg:pattern')
+    .attr('id', 'asteroid_img')
+    .attr('width', 30)
+    .attr('height', 30)
+    //.attr('patternUnits', 'userSpaceOnUse')
+    .append('svg:image')
+    .attr('xlink:href', 'asteroid.png')
+    .attr('width', 30)
+    .attr('height', 30)  
+    .attr('x', 0)
+    .attr('y', 0);
 
-const numEnemies = 40;
+
+const numEnemies = 500;
 var playingFieldSize = {
   width: board[0][0].scrollWidth,
   height: board[0][0].scrollHeight
+};
+var randomPixelX = function randomPixelX() {
+  return Math.floor(Math.random() * playingFieldSize.width);
+};
+var randomPixelY = function randomPixelY() {
+  return Math.floor(Math.random() * playingFieldSize.height);
 };
 
 var generateCirclePositions = function(numCircles) {
@@ -40,7 +59,8 @@ board.selectAll('.enemy').data(generateCirclePositions(numEnemies))
                          .attr('cx', function (d) { return d.xAxis; })
                          .attr('cy', function (d) { return d.yAxis; })
                          .attr('r', function (d) { return d.radius; })
-                         .style('fill', function(d) { return d.color; })
+                          .style('fill', function(d) { return d.color; })
+                         //.style('fill', 'url(#asteroid_img)')
                          .classed('enemy', true);
 
 // Make them move!
@@ -93,12 +113,7 @@ var randomNum = function() {
   return Math.floor(Math.random() * 101);
 };
 
-function randomPixelX() {
-  return Math.floor(Math.random() * playingFieldSize.width);
-}
-function randomPixelY() {
-  return Math.floor(Math.random() * playingFieldSize.height);
-}
+
 
 var dragstarted = function(d, i) {
   console.log('You clicked a draggable!');
