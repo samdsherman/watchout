@@ -49,6 +49,8 @@ var updateEnemyPosition = function() {
                            .classed('collided', false)
                            .transition().duration(2000)
                            .tween('Hi Oleg', function(d, i) {
+                             var score = d3.select('.current').selectAll('span');
+                             score.text(parseInt(score.text(), 10) + 1);
                              var currentX = this.getAttribute('cx');
                              currentX = parseInt(currentX, 10);
                              var currentY = this.getAttribute('cy');
@@ -68,6 +70,11 @@ var updateEnemyPosition = function() {
                                  var currentCollisions = d3.select('.collisions').selectAll('span');
                                  currentCollisions.text(parseInt(currentCollisions.text(), 10) + 1);
                                  d3.select(this).classed('collided', true);
+                                 var highScore = d3.select('.highscore').selectAll('span');
+                                 if (parseInt(score.text(), 10) > parseInt(highScore.text(), 10)) {
+                                   highScore.text(score.text());
+                                 }
+                                 score.text(0);
                                }
 
                              };
