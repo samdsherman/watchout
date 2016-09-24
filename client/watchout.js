@@ -19,17 +19,18 @@
 
 var board = d3.select('.board').append('svg');
 
-const numEnemies = 20;
+const numEnemies = 10;
 
-var randomNum = function() {
-  return Math.floor(Math.random() * 101);
+var playingFieldSize = {
+  width: board.node().getBBox().width,
+  height: board.node().getBBox().height
 };
 
 var generateCirclePositions = function(numCircles) {
   var circleOptions = [];
 
   for (var i = 0; i < numCircles; i++) {
-    circleOptions.push({'xAxis': randomNum(), 'yAxis': randomNum(), 'radius': 15, 'color': 'black'});
+    circleOptions.push({'xAxis': randomPixelX(), 'yAxis': randomPixelY(), 'radius': 15, 'color': 'black'});
   }
   return circleOptions;
 };
@@ -37,8 +38,8 @@ var generateCirclePositions = function(numCircles) {
 // Populate board with enemies
 board.selectAll('.enemy').data(generateCirclePositions(numEnemies))
                          .enter().append('circle')
-                         .attr('cx', function (d) { return d.xAxis + '%'; })
-                         .attr('cy', function (d) { return d.yAxis + '%'; })
+                         .attr('cx', function (d) { return d.xAxis; })
+                         .attr('cy', function (d) { return d.yAxis; })
                          .attr('r', function (d) { return d.radius; })
                          .style('fill', function(d) { return d.color; })
                          .classed('enemy', true);
@@ -47,6 +48,27 @@ board.selectAll('.enemy').data(generateCirclePositions(numEnemies))
 var updateEnemyPosition = function() {
   board.selectAll('.enemy').data(generateCirclePositions(numEnemies))
                            .transition().duration(2000)
+                           .tween('Hi Fred', function(d, i) {
+                             var currentX = this.getAttribute('cx');
+                             currentX = parseInt(currentX, 10);
+                             var currentY = this.getAttribute('cy');
+                             currentY = parseInt(currentY, 10);
+                             var newX = d.xAxis;
+                             var newY = d.yAxis;
+                             var interpolateX = d3.interpolate(currentX, newX);
+                             var interpolateY = d3.interpolate(currentY, newY);
+                             return function(t) {
+                               var enemyX = interpolateX(t);
+                               var enemyY = interpolateY(t);
+                               // debugger;
+                               if (Math.abs(enemyX - playerX) < 10 && Math.abs(enemyY - playerY) < 10) {
+
+                                 var currentCollisions = d3.select('.collisions').selectAll('span');
+                                 currentCollisions.text(parseInt(currentCollisions.text(), 10) + 1);
+                               }
+
+                             };
+                           })
                            .attr('cx', function (d) { return d.xAxis + '%'; })
                            .attr('cy', function (d) { return d.yAxis + '%'; });
 };
@@ -54,11 +76,19 @@ var updateEnemyPosition = function() {
 setInterval(updateEnemyPosition, 2000);
 
 var newGame = true;
+var playerX = 0;
+var playerY = 0;
 
-var playingFieldSize = {
-  width: board.node().getBBox().width,
-  height: board.node().getBBox().height
+var randomNum = function() {
+  return Math.floor(Math.random() * 101);
 };
+
+function randomPixelX() {
+  return Math.floor(Math.random() * playingFieldSize.width);
+}
+function randomPixelY() {
+  return Math.floor(Math.random() * playingFieldSize.height);
+}
 
 var dragstarted = function(d, i) {
   console.log('You started dragging!');
@@ -76,6 +106,8 @@ var dragged = function(d, i) {
   d3.select(this).attr('transform', function(d, i) {
     return 'translate(' + [ d.xAxis, d.yAxis ] + ')';
   });
+  playerX = d.xAxis;
+  playerY = d.yAxis;
 };
 var dragended = function() {
   console.log('You finished dragging!');
